@@ -5,9 +5,10 @@
     <title>Tugas Rio Ananda</title>
     <style>
         body { font-family: sans-serif; text-align: center; margin-top: 50px; background-color: #f4f4f9; }
-        .card { background: white; padding: 20px; border-radius: 10px; display: inline-block; box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
+        .card { background: white; padding: 20px; border-radius: 10px; display: inline-block; box-shadow: 0 4px 8px rgba(0,0,0,0.1); min-width: 300px; }
         h1 { color: #2c3e50; }
         .status-aktif { color: green; font-weight: bold; }
+        .data-item { text-transform: capitalize; } /* Membuat huruf depan kategori jadi kapital */
     </style>
 </head>
 <body>
@@ -17,10 +18,8 @@
         <hr>
         <p>Status Hosting: <b>Aktif</b></p>
         
-        <div style="text-align: left; margin: 15px 0;">
-            <p>NIM : <b id="display-nim">Loading...</b></p>
-            <p>Nama: <b id="display-nama">Loading...</b></p>
-            <p>Kelas: <b id="display-kelas">Loading...</b></p>
+        <div id="tempat-data" style="text-align: left; margin: 15px 0;">
+            <p>Loading data...</p>
         </div>
         <hr>
 
@@ -44,20 +43,26 @@
       try {
           const app = initializeApp(firebaseConfig);
           const db = getDatabase(app); 
-          
-          // Logika tambahan untuk membaca data secara realtime
           const dbRef = ref(db);
+          
           onValue(dbRef, (snapshot) => {
             const data = snapshot.val();
+            const wadahData = document.getElementById("tempat-data");
+            
+            // Kosongkan ruangan sebelum diisi data baru
+            wadahData.innerHTML = ""; 
+
             if (data) {
-              // Menyesuaikan dengan huruf kapital di database Firebase-mu
-              document.getElementById("display-nim").innerText = data.NIM;
-              document.getElementById("display-nama").innerText = data.Nama;
-              document.getElementById("display-kelas").innerText = data.Kelas;
+              // LOOPING: Baca semua data di Firebase satu per satu
+              for (const [kategori, isi] of Object.entries(data)) {
+                  // Generate HTML otomatis untuk setiap data yang ditemukan
+                  wadahData.innerHTML += `<p class="data-item">${kategori}: <b>${isi}</b></p>`;
+              }
               
               document.getElementById("db-status").innerText = "Terhubung & Data Tampil! ✅";
               document.getElementById("db-status").className = "status-aktif";
-              console.log("Realtime Database berhasil terhubung dan memuat data!");
+            } else {
+              wadahData.innerHTML = "<p>Database masih kosong.</p>";
             }
           });
 
